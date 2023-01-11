@@ -36,7 +36,7 @@ class LocalStreamListener(StreamListener):
         try:
             super().handle_stream(response)
         except:
-            print("Error")
+            print("Error!")
 
     def on_update(self, status):
         # 投稿の画像データとNSFWフラグを取得
@@ -46,13 +46,21 @@ class LocalStreamListener(StreamListener):
         # NSFWフラグが無効になっている画像をチェック
         if sensitive == False and len(media_attachments) > 0:
             for media_attachment in media_attachments:
+                # ログに画像のURLを出力
+                print(media_attachment.url)
+
                 # 画像を一時的に保存
                 dst_path = './nsfw'
                 download_file(media_attachment.url, dst_path)
 
-                # 画像がNSFWなものかをチェック、基準値以上の場合はリプライで警告
+                # 画像がNSFWなものかをチェックし、ダウンロードした画像は削除
                 result = n2.predict_image(dst_path)
                 os.remove(dst_path)
+
+                # チェック結果をログに出力
+                print(result)
+
+                # 基準値以上の場合はリプライで警告
                 if result > 0.90:
                     self.client.status_reply(status, 'NSFWな画像です。投稿を編集してNSFWを有効にしてください', status.id)
                     break
