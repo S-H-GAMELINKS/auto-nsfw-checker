@@ -1,2 +1,3 @@
 Mastodon.py
 opennsfw2
+python-dotenv
