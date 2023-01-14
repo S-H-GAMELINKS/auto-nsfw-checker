@@ -60,8 +60,9 @@ class LocalStreamListener(StreamListener):
                 # チェック結果をログに出力
                 print(result)
 
-                # 基準値以上の場合はリプライで警告
+                # 基準値以上の場合はリプライで警告しつつ、通報を追加
                 if result > 0.90:
+                    self.client.report(status.account.id, status_ids=[status.id])
                     self.client.status_reply(status, 'NSFWな画像です。投稿を編集してNSFWを有効にしてください', status.id)
                     break
 
