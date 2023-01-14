@@ -60,9 +60,9 @@ class PublicStreamListener(StreamListener):
                 # チェック結果をログに出力
                 print(result)
 
-                # 基準値以上の場合はリプライで警告
+                # 基準値以上の場合は通報
                 if result > 0.90:
-                    self.client.report(status.account.id)
+                    self.client.report(status.account.id, status_ids=[status.id])
                     break
 
 # 連合タイムラインのListenerを生成            
