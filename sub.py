@@ -61,7 +61,7 @@ class PublicStreamListener(StreamListener):
                     print(result)
 
                     # 基準値以上の場合は通報
-                    if result:
+                    if result > 0.90:
                         # 投稿のIDとアカウントを取得
                         statusID = status.id
                         account = status.account
