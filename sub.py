@@ -62,11 +62,27 @@ class PublicStreamListener(StreamListener):
 
                 # 基準値以上の場合は通報
                 if result > 0.90:
-                    self.client.report(status.account.id, status_ids=[status.id])
+                    # 投稿のIDとアカウントを取得
+                    statusID = status.id
+                    account = status.account
+
+                    # ログにアカウント情報などを出力
+                    print(account.id)
+                    print(self.client.account_followers(account.id))
+
+                    # 通報対象の投稿をしたアカウントをフォローしているユーザーがいるかを取得
+                    target_account_followers = self.client.account_followers(account.id)
+
+                    # 通報を行い、該当の投稿を自動削除
+                    # 条件：対象の投稿をしたアカウントをフォローしているユーザーがサーバ内にいない
+                    if len(target_account_followers) == 0:
+                        self.client.report(account.id, status_ids=[statusID])
+                        self.client.status_delete(statusID)
+
                     break
 
 # 連合タイムラインのListenerを生成            
 public_stream_listener = PublicStreamListener(client)
 
 # 連合タイムラインをListen
-client.stream_public(public_stream_listener)
+client.stream_public(public_stream_listener, remote=True)
