@@ -22,7 +22,7 @@ def download_file(url, dst_path):
             with open(dst_path, mode='wb') as local_file:
                 local_file.write(data)
     except urllib.error.URLError as e:
-        print(e)
+        pass
 
 # ローカルタイムラインをListenするためのクラスを定義
 class LocalStreamListener(StreamListener):
@@ -36,35 +36,39 @@ class LocalStreamListener(StreamListener):
         try:
             super().handle_stream(response)
         except:
-            print("Error!")
+            pass
 
     def on_update(self, status):
-        # 投稿の画像データとNSFWフラグを取得
-        sensitive = status.get('sensitive')
-        media_attachments = status.get('media_attachments')
+        try:
+            # 投稿の画像データとNSFWフラグを取得
+            sensitive = status.get('sensitive')
+            media_attachments = status.get('media_attachments')
 
-        # NSFWフラグが無効になっている画像をチェック
-        if sensitive == False and len(media_attachments) > 0:
-            for media_attachment in media_attachments:
-                # ログに画像のURLを出力
-                print(media_attachment.url)
+            # NSFWフラグが無効になっている画像をチェック
+            if sensitive == False and len(media_attachments) > 0:
+                for media_attachment in media_attachments:
+                    # ログに画像のURLを出力
+                    print(media_attachment.url)
 
-                # 画像を一時的に保存
-                dst_path = './nsfw'
-                download_file(media_attachment.url, dst_path)
+                    # 画像を一時的に保存
+                    dst_path = './nsfw'
+                    download_file(media_attachment.url, dst_path)
 
-                # 画像がNSFWなものかをチェックし、ダウンロードした画像は削除
-                result = n2.predict_image(dst_path)
-                os.remove(dst_path)
+                    # 画像がNSFWなものかをチェックし、ダウンロードした画像は削除
+                    result = n2.predict_image(dst_path)
+                    os.remove(dst_path)
 
-                # チェック結果をログに出力
-                print(result)
+                    # チェック結果をログに出力
+                    print(result)
 
-                # 基準値以上の場合はリプライで警告しつつ、通報を追加
-                if result > 0.90:
-                    self.client.report(status.account.id, status_ids=[status.id])
-                    self.client.status_reply(status, 'NSFWな画像です。投稿を編集してNSFWを有効にしてください', status.id)
-                    break
+                    # 基準値以上の場合はリプライで警告しつつ、通報を追加
+                    if result > 0.90:
+                        self.client.report(status.account.id, status_ids=[status.id])
+                        self.client.status_reply(status, 'NSFWな画像です。投稿を編集してNSFWを有効にしてください', status.id)
+                        break
+        except Exception as e:
+            print(e)
+            pass
 
 # ローカルタイムラインのListenerを生成            
 stream_listener = LocalStreamListener(client)
